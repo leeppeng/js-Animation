@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>this</title>
+<meta charset="UTF-8">
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta http-equiv="X_UA-compatible" content="IE=dege">
+<meta name="viewport" content="width=device-width" initial-scale="1">
+<style>
+	*{padding:0;margin:0;}
+	.box{
+		width:300px;
+		height:400px;
+		position: fixed;
+		left:-300px;
+		top:0;
+		background: #ddd;
+	}
+	.hover{
+		width:40px;
+		height:100px;
+		background: #ddd;
+		position: absolute;
+		right:-40px;
+	}
+	.alpha{
+		margin-top:300px;
+		width:100%;
+		height:150px;
+	}
+	.alpha li{
+		width:50px;
+		height:50px;
+		opacity: 0.3;
+		background: red;
+		filter:alpha(opacity:30);
+		float:left;
+	}
+	.duo{
+		width:100px;
+		height:100px;
+		margin-bottom: 30px;
+		background: yellow;
+		border:2px solid #000;
+		filter:alpha(opacity:30);
+		opacity: 0.3
+	}
+</style>
+<body>
+	<div class="box">
+		<div class="hover"></div>
+	</div>
+	<ul class="alpha">
+		<li>1</li>
+		<li>2</li>
+		<li>3</li>
+		<li>4</li>
+		<li>5</li>
+		<li>6</li>
+	</ul>
+	<div class="duo"></div>
+	<div class="duo"></div>
+	<div class="duo"></div>
+</body>
+</html>
+<script type="text/javascript">
+window.onload=function(){
+	var Divo = document.getElementsByClassName("box")[0];
+	Divo.onmouseover = function(){
+		Move(0);
+	}
+	Divo.onmouseout = function(){
+		Move(-300);
+	}
+	var timer = null;
+	function Move(mb){
+		clearInterval(timer);
+		/*if(Divo.offsetLeft>mb){
+			shudu=-10;
+		}else{
+			shudu=10;
+		}*/
+		timer =  setInterval(function(){
+			var shudu=(mb-Divo.offsetLeft)/20;
+			shudu = shudu>0?Math.ceil(shudu):Math.floor(shudu);
+			if(Divo.offsetLeft == mb){
+				clearInterval(timer);
+			}else{
+				Divo.style.left = Divo.offsetLeft+shudu+'px';
+			}
+		},30)
+	}
+//透明度动画
+	var alpha = document.getElementsByClassName('alpha')[0];
+	var aLi = alpha.getElementsByTagName('li');
+	for(var i=0 ;i<aLi.length;i++){
+		aLi[i].alpha_timer =null;
+		aLi[i].opacity = 30;
+		aLi[i].onmouseover =function(){
+			alphastart(this,100);
+		}
+		aLi[i].onmouseout =function(){
+			alphastart(this,30);
+		}
+	}
+	function alphastart(obj,mubiao){
+		clearInterval(obj.alpha_timer);
+		var speed = 0;
+		if(obj.opacity > mubiao){
+			speed=-10;
+		}else{
+			speed=10;
+		}
+		obj.alpha_timer = setInterval(function(){
+			if(obj.opacity == mubiao){
+				clearInterval(obj.alpha_timer);
+			}else{
+				obj.opacity+=speed;
+				obj.style.filter = 'alpha(opacity:'+obj.opacity+')';
+				obj.style.opacity = obj.opacity/100;
+			}
+		},50);
+	}
+
+
+	var Duo = document.getElementsByClassName('duo');
+	for(var j=0;j<Duo.length;j++){
+		Duo[j].duo_timer = null;
+		Duo[j].onmouseover = function(){
+			let that = this;//解决this作用域问题
+			duowidth(this,'opacity',100,function(){
+				duowidth(that,'width',300,function(){
+					duowidth(that,'height',30);
+				});
+			});
+		}
+		Duo[j].onmouseout = function(){
+			let that = this;//解决this作用域问题
+			duowidth(this,'opacity',30,function(){
+				duowidth(that,'width',100,function(){
+					duowidth(that,'height',100);
+				});
+			});
+		}
+	}
+
+	function duowidth(obje,sty,zd,fn){
+		clearInterval(obje.duo_timer);
+		obje.duo_timer = setInterval(function(){
+			//取当前值
+			let cur =0;
+			if(sty=='opacity'){//判断是不是透明度动画
+				cur = Math.round(parseFloat(getStyle(obje,sty))*100);
+			}else{
+				cur = parseInt(getStyle(obje,sty));
+			}
+			//算速度
+			var wsd = (zd-cur)/20;
+			wsd = wsd>0?Math.ceil(wsd):Math.floor(wsd);
+			//检测停止
+			if(cur == zd){
+				clearInterval(obje.duo_timer);
+				if(fn){
+					fn();
+				}
+			}else{
+				if(sty=='opacity'){//判断是不是透明度动画
+					obje.style.filter = 'alpha(opacity:'+(cur+wsd)+')';
+					obje.style.opacity = (cur+wsd)/100;
+				}else{
+					obje.style[sty] = cur+wsd+'px';
+				}
+			}
+		},30);
+	}
+
+}
+function getStyle(obj,attr){//获取样式
+        if(obj.currentStyle){
+            return obj.currentStyle[attr];//IE
+        }else{
+            return getComputedStyle(obj,false)[attr];//火狐
+        }
+    }	
+</script>
